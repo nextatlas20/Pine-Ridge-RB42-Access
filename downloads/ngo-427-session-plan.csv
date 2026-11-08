@@ -1,5 +1,0 @@
-status,proposal_id,instrument_id,instrument_name,title,host,starts_at,duration_minutes,attendees,priority
-SELECTED,P-09,SCOPE-EMBER,Ember Reflector,Ring Nebula Watch,E. Soto,2035-09-14T20:30:00Z,45,7,85
-SELECTED,P-21,SCOPE-LUNA,Luna Refractor,Moonrise Sketching,T. Vale,2035-09-14T20:30:00Z,30,8,80
-SELECTED,P-04,SCOPE-LUNA,Luna Refractor,Highland Shadows,A. Chen,2035-09-14T21:00:00Z,30,12,70
-WAITLISTED,P-40,SCOPE-EMBER,Ember Reflector,Double Star Colors,N. Ives,2035-09-14T21:00:00Z,30,6,75
