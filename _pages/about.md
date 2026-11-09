@@ -1,19 +1,19 @@
 ---
-title: "Silver Creek TB-354 Trail Closures"
+title: "Pine Ridge RB-42 Trail Access"
 permalink: /
 layout: single
 ---
 
-## Closure bulletin
-Silver Creek Trail Closure Calendar — June 2097
+## Discovery Route conditions
+Pine Ridge Discovery Route — Pre-opening assessment
 
-Silver Creek Parks publishes the TB-354 trail closure calendar.
+Pine Ridge Nature Reserve is publishing the RB-42 trail access bulletin.
 
-## Merge rule
-Merge rule: overlapping or touching notices for the same trail form one closure window.
+## Assessment policy
+Assessment policy: use the latest valid inspection for each route segment.
 
-## Trail desk
-Trail desk: trails@silvercreek.example
+## Access desk
+Access desk: access@pineridge.example
 
-## Calendar summary
-Three merged closure windows cover three active trails. Juniper Loop is closed for 180 minutes, Moss Ridge for 120, and Quarry Path for 60.
+## Current status
+One segment is open, two are limited, and one is closed.
