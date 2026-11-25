@@ -25,6 +25,9 @@ jobs:
           import json
           from pathlib import Path
 
+          for directory in ("_data", "downloads", "_pages"):
+              Path(directory).mkdir(parents=True, exist_ok=True)
+
           # _config.yml: replace the title, description, and default author email lines.
           config = Path("_config.yml").read_text(encoding="utf-8")
           lines = config.splitlines(keepends=True)
