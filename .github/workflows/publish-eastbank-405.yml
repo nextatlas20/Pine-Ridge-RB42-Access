@@ -1,0 +1,284 @@
+name: Publish Eastbank SN-405 allocation release
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reset to upstream and build release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 https://github.com/academicpages/academicpages.github.io.git master
+          git reset --hard FETCH_HEAD
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          # _config.yml: replace the title, description, and default author email lines.
+          config = Path("_config.yml").read_text(encoding="utf-8")
+          lines = config.splitlines(keepends=True)
+
+          def replace_root_key(key, replacement):
+              matches = [i for i, line in enumerate(lines)
+                         if line.startswith(key) and line[len(key):].lstrip(" \t").startswith(":")]
+              if len(matches) != 1:
+                  raise SystemExit(f"expected exactly one root-level {key} line, found {matches}")
+              old = lines[matches[0]]
+              ending = old[len(old.rstrip("\r\n")):]
+              lines[matches[0]] = replacement + ending
+
+          replace_root_key("title", "title: Eastbank SN-405 Tree Allocation")
+          replace_root_key("description", "description: Public seedling pickup allocation")
+
+          email_matches = [i for i, line in enumerate(lines)
+                           if line.lstrip(" \t").startswith("email") and "none@example.org" in line]
+          if len(email_matches) != 1:
+              raise SystemExit(f"expected exactly one default email line, found {email_matches}")
+          old = lines[email_matches[0]]
+          ending = old[len(old.rstrip("\r\n")):]
+          lines[email_matches[0]] = "email: trees@eastbank.example" + ending
+          config = "".join(lines)
+          Path("_config.yml").write_text(config, encoding="utf-8", newline="")
+
+          # _pages/about.md
+          about = (
+              "---\n"
+              'title: "Eastbank SN-405 Tree Allocation"\n'
+              "permalink: /\n"
+              "layout: single\n"
+              "---\n"
+              "\n"
+              "## Pickup manifest\n"
+              "Seventeen seedlings are allocated to eight admitted neighborhood requests.\n"
+              "\n"
+              "## Fair allocation\n"
+              "Rotating rounds leave four of 21 requested seedlings unfilled.\n"
+              "\n"
+              "## Contact\n"
+              "Nursery desk: trees@eastbank.example\n"
+          )
+          Path("_pages/about.md").write_text(about, encoding="utf-8", newline="")
+
+          lots = [
+              {
+                  "variety_code": "BIRCH",
+                  "variety_name": "River Birch",
+                  "available_count": 7,
+                  "request_count": 2,
+                  "requested_count": 6,
+                  "allocated_count": 6,
+                  "unfilled_count": 0,
+                  "remaining_count": 1,
+              },
+              {
+                  "variety_code": "MAPLE",
+                  "variety_name": "Field Maple",
+                  "available_count": 6,
+                  "request_count": 3,
+                  "requested_count": 8,
+                  "allocated_count": 6,
+                  "unfilled_count": 2,
+                  "remaining_count": 0,
+              },
+              {
+                  "variety_code": "OAK",
+                  "variety_name": "Sessile Oak",
+                  "available_count": 5,
+                  "request_count": 3,
+                  "requested_count": 7,
+                  "allocated_count": 5,
+                  "unfilled_count": 2,
+                  "remaining_count": 0,
+              },
+          ]
+
+          requests = [
+              {
+                  "variety_code": "BIRCH",
+                  "variety_name": "River Birch",
+                  "queue_position": 1,
+                  "request_id": "B-11",
+                  "group_name": "Canal Court",
+                  "priority_tier": 1,
+                  "received_at": "2027-04-18T09:00:00Z",
+                  "requested_count": 3,
+                  "allocated_count": 3,
+                  "unfilled_count": 0,
+                  "status": "fulfilled",
+              },
+              {
+                  "variety_code": "BIRCH",
+                  "variety_name": "River Birch",
+                  "queue_position": 2,
+                  "request_id": "B-12",
+                  "group_name": "Dove Lane",
+                  "priority_tier": 1,
+                  "received_at": "2027-04-18T09:00:00Z",
+                  "requested_count": 3,
+                  "allocated_count": 3,
+                  "unfilled_count": 0,
+                  "status": "fulfilled",
+              },
+              {
+                  "variety_code": "MAPLE",
+                  "variety_name": "Field Maple",
+                  "queue_position": 1,
+                  "request_id": "M-01",
+                  "group_name": "Foundry House",
+                  "priority_tier": 1,
+                  "received_at": "2027-04-19T10:30:00Z",
+                  "requested_count": 1,
+                  "allocated_count": 1,
+                  "unfilled_count": 0,
+                  "status": "fulfilled",
+              },
+              {
+                  "variety_code": "MAPLE",
+                  "variety_name": "Field Maple",
+                  "queue_position": 2,
+                  "request_id": "M-02",
+                  "group_name": "Gannet Row",
+                  "priority_tier": 2,
+                  "received_at": "2027-04-18T08:00:00Z",
+                  "requested_count": 4,
+                  "allocated_count": 3,
+                  "unfilled_count": 1,
+                  "status": "partial",
+              },
+              {
+                  "variety_code": "MAPLE",
+                  "variety_name": "Field Maple",
+                  "queue_position": 3,
+                  "request_id": "M-03",
+                  "group_name": "Harbour Youth Club",
+                  "priority_tier": 2,
+                  "received_at": "2027-04-18T08:00:00Z",
+                  "requested_count": 3,
+                  "allocated_count": 2,
+                  "unfilled_count": 1,
+                  "status": "partial",
+              },
+              {
+                  "variety_code": "OAK",
+                  "variety_name": "Sessile Oak",
+                  "queue_position": 1,
+                  "request_id": "O-07",
+                  "group_name": "Iris Terrace",
+                  "priority_tier": 1,
+                  "received_at": "2027-04-16T12:00:00Z",
+                  "requested_count": 2,
+                  "allocated_count": 2,
+                  "unfilled_count": 0,
+                  "status": "fulfilled",
+              },
+              {
+                  "variety_code": "OAK",
+                  "variety_name": "Sessile Oak",
+                  "queue_position": 2,
+                  "request_id": "O-08",
+                  "group_name": "Juniper Workshop",
+                  "priority_tier": 1,
+                  "received_at": "2027-04-17T12:00:00Z",
+                  "requested_count": 1,
+                  "allocated_count": 1,
+                  "unfilled_count": 0,
+                  "status": "fulfilled",
+              },
+              {
+                  "variety_code": "OAK",
+                  "variety_name": "Sessile Oak",
+                  "queue_position": 3,
+                  "request_id": "O-09",
+                  "group_name": "Kingfisher Walk",
+                  "priority_tier": 3,
+                  "received_at": "2027-04-15T12:00:00Z",
+                  "requested_count": 4,
+                  "allocated_count": 2,
+                  "unfilled_count": 2,
+                  "status": "partial",
+              },
+          ]
+
+          manifest = {
+              "campaign_id": "SN-405",
+              "campaign_title": "Eastbank Street Tree Pickup",
+              "pickup_date": "2027-04-24",
+              "request_cutoff": "2027-04-20T17:00:00Z",
+              "contact_email": "trees@eastbank.example",
+              "eligible_lot_count": 3,
+              "admitted_request_count": 8,
+              "total_requested_count": 21,
+              "total_allocated_count": 17,
+              "total_unfilled_count": 4,
+              "fulfilled_request_count": 5,
+              "partial_request_count": 3,
+              "lots": lots,
+              "requests": requests,
+          }
+          manifest_text = json.dumps(manifest, separators=(",", ":"), ensure_ascii=False) + "\n"
+          Path("_data/sn-405-allocation.json").write_text(manifest_text, encoding="utf-8", newline="")
+
+          fields = [
+              "variety_code",
+              "variety_name",
+              "queue_position",
+              "request_id",
+              "group_name",
+              "priority_tier",
+              "received_at",
+              "requested_count",
+              "allocated_count",
+              "unfilled_count",
+              "status",
+          ]
+          csv_lines = [",".join(fields)]
+          for request in requests:
+              csv_lines.append(",".join(str(request[field]) for field in fields))
+          csv_text = "\n".join(csv_lines) + "\n"
+          Path("downloads/sn-405-pickup.csv").write_text(csv_text, encoding="utf-8", newline="")
+
+          shortfall = (
+              "# SN-405 seedling shortfall\n"
+              "\n"
+              "Seventeen of 21 requested seedlings are allocated across three public nursery lots.\n"
+              "\n"
+              "## Lot totals\n"
+              "- BIRCH: 6 allocated, 0 unfilled, 1 remaining\n"
+              "- MAPLE: 6 allocated, 2 unfilled, 0 remaining\n"
+              "- OAK: 5 allocated, 2 unfilled, 0 remaining\n"
+              "\n"
+              "## Partial requests\n"
+              "- MAPLE \u2014 M-02: Gannet Row receives 3 of 4\n"
+              "- MAPLE \u2014 M-03: Harbour Youth Club receives 2 of 3\n"
+              "- OAK \u2014 O-09: Kingfisher Walk receives 2 of 4\n"
+          )
+          Path("downloads/sn-405-shortfall.md").write_text(shortfall, encoding="utf-8", newline="")
+
+          combined = config + about + manifest_text + csv_text + shortfall
+          for forbidden in (
+              "Key cabinet code is " + "sapling-821",
+              "Do not publish the resident " + "telephone sheet",
+              "Resident address list stays " + "internal",
+          ):
+              if forbidden.lower() in combined.lower():
+                  raise SystemExit("privacy stop: forbidden private note present")
+
+          print("built SN-405 release files")
+          PY
+
+          git config user.name "Eastbank Nursery"
+          git config user.email "trees@eastbank.example"
+          git add -A
+          git commit -m "Publish SN-405 public allocation release"
+          git push --force origin master
